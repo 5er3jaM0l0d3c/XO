@@ -7,6 +7,7 @@
         public static bool isFirstPlayer = true;
         public static string winner = String.Empty;
         public static int settedButtons = 0;
+        public static int isWaiting = 0;
         public static void ResetAll()
         {
             players = new List<string>();

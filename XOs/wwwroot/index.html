@@ -7,10 +7,28 @@
 <body>
     <p style="text-align:center;vertical-align:central">
         <h4>Введите никнейм:</h4>
-        <input id="nickname" type="text"/>
+        <input id="nickname" type="text" />
         <button id="startButton">Начать игру</button>
     </p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
     <script>
+
+        // Создаем подключение к Hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // Начинаем подключение
+        connection.start().then(() => {
+            console.log("Connected!");
+        }).catch(err => {
+            console.error(err.toString());
+        });
+
+
+
         let btn = document.getElementById("startButton");
         btn.addEventListener("click", async function () {
             const response = await fetch("/api/setplayer?player=" + document.getElementById("nickname").value, {
@@ -26,14 +44,19 @@
                 if (data.success === true) {
                     sessionStorage.setItem("name", document.getElementById("nickname").value);
                     sessionStorage.setItem("id", data.id);
-                    document.location.href = "game.html";
+
+                    connection.invoke("SendNotWaiting").catch(err => {
+                        console.error(err.toString());
+                    });
+
+                    document.location.href = "waiting.html";
                 }
                 else {
                     alert("Такой никнейм уже используется или уже зарегистрированы 2 игрока");
                 }
             }
         })
-        
+
     </script>
 </body>
 </html>

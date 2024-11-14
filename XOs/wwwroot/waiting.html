@@ -1,0 +1,39 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <h3>Ждем второго игрока</h3>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // Начинаем подключение
+        connection.start().then(() => {
+            console.log("Connected!");
+        }).catch(err => {
+            console.error(err.toString());
+        });
+
+
+        // Обрабатываем получение сообщения
+        connection.on("ReceiveWaitingPlayer", (isWaiting) => {
+            if (isWaiting > 1) {
+                connection.invoke("SendNotWaiting").catch(err => {
+                    console.error(err.toString());
+                });
+                document.location.href = "/game.html";
+            }
+
+        });
+
+
+
+    </script>
+</body>
+</html>

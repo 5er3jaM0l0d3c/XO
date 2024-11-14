@@ -17,5 +17,12 @@ namespace XOs
 
             await Clients.Others.SendAsync("ReceiveMessage", player, button);
         }
+
+        public async Task SendNotWaiting()
+        {
+            Data.isWaiting++;
+            await Clients.All.SendAsync("ReceiveWaitingPlayer", Data.isWaiting);
+        }
+
     }
 }
