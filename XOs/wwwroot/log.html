@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <ol id="ol">
+
+    </ol>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="js/SignalRConnection.js"></script>
+    <script>
+        let ol = document.getElementById("ol");
+        connection.on("ReceiveLogs", (log) => {
+            let liLast = document.createElement("li");
+            liLast.innerHTML = log;
+            ol.append(liLast);
+        });
+    </script>
+</body>
+</html>

@@ -31,3 +31,11 @@
 .hide{
     display:none;
 }
+
+.hidden{
+    visibility:collapse;
+}
+
+.visibile{
+    visibility:visible;
+}

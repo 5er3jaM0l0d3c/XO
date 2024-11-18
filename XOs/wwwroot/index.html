@@ -11,50 +11,52 @@
         <button id="startButton">Начать игру</button>
     </p>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="js/SignalRConnection.js"></script>
     <script>
-
-        // Создаем подключение к Hub
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .build();
-
-        // Начинаем подключение
-        connection.start().then(() => {
-            console.log("Connected!");
-        }).catch(err => {
-            console.error(err.toString());
-        });
 
 
 
         let btn = document.getElementById("startButton");
         btn.addEventListener("click", async function () {
-            const response = await fetch("/api/setplayer?player=" + document.getElementById("nickname").value, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+            if (isConnected) {
+                const response = await fetch("/api/setplayer?player=" + document.getElementById("nickname").value, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
 
-            });
-            if (response.ok === true) {
-                const data = await response.json();
-                if (data.success === true) {
-                    sessionStorage.setItem("name", document.getElementById("nickname").value);
-                    sessionStorage.setItem("id", data.id);
+                });
+                if (response.ok === true) {
+                    const data = await response.json();
+                    if (data.success === true) {
+                        sessionStorage.setItem("name", document.getElementById("nickname").value);
+                        sessionStorage.setItem("id", data.id);
 
-                    connection.invoke("SendNotWaiting").catch(err => {
-                        console.error(err.toString());
-                    });
 
-                    document.location.href = "waiting.html";
-                }
-                else {
-                    alert("Такой никнейм уже используется или уже зарегистрированы 2 игрока");
+                        connection.invoke("SendNotWaiting", sessionStorage.getItem("name")).then(console.log("запрос")).catch(err => {
+                            console.error(err.toString());
+                        });
+
+                        connection.invoke("SendLog", sessionStorage.getItem("name") + " : ввел никнейм").catch(err => {
+                            console.error(err.toString());
+                        });
+
+                        document.location.href = "game.html";
+                    }
+                    else {
+                        connection.invoke("SendLog", sessionStorage.getItem("name") + " : алерт о невозможности игры").catch(err => {
+                            console.error(err.toString());
+                        });
+                        alert("Такой никнейм уже используется или уже зарегистрированы 2 игрока");
+                    }
                 }
             }
+            else {
+                alert("Подключение не было установлено, попробуйте ещё раз через пару секунд");
+            }
+            
         })
 
     </script>

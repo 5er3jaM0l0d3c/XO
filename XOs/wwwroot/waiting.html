@@ -5,35 +5,39 @@
     <title></title>
 </head>
 <body>
-    <h3>Ждем второго игрока</h3>
+    <div id="waiting">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+        <h3>Ждем второго игрока</h3>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="js/SignalRConnection.js"></script>
+    <script src="js/StartGame.js"></script>
     <script>
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chatHub")
-            .build();
 
-        // Начинаем подключение
-        connection.start().then(() => {
-            console.log("Connected!");
-        }).catch(err => {
-            console.error(err.toString());
-        });
-
+        function cheking() {
+            if (isConnected)
+                connection.invoke("CheckWaiting").catch(err => {
+                    console.error(err.toString());
+                });
+        }
+        setInterval(cheking, 3000);
 
         // Обрабатываем получение сообщения
         connection.on("ReceiveWaitingPlayer", (isWaiting) => {
+
             if (isWaiting > 1) {
-                connection.invoke("SendNotWaiting").catch(err => {
+
+                connection.invoke("SendLog", sessionStorage.getItem("name") + " : получил сообщение о готовности второго игрока").catch(err => {
                     console.error(err.toString());
                 });
                 document.location.href = "/game.html";
             }
-
         });
 
 
 
     </script>
+    
 </body>
 </html>

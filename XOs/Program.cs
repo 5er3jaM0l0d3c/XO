@@ -5,7 +5,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(600);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(60);
+    options.MaximumParallelInvocationsPerClient = 2;
+    options.EnableDetailedErrors = true;
+    options.HandshakeTimeout = TimeSpan.FromSeconds(60);
+});
 
 
 
@@ -21,6 +28,7 @@ app.MapHub<ChatHub>("/chatHub");
 app.MapGet("/", async (context) => context.Response.Redirect("/index.html"));
 
 app.MapGet("/api/endgame", () => Data.ResetAll());
+
 
 
 app.MapGet("/api/getfield", () =>
