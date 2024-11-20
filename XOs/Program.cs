@@ -25,17 +25,22 @@ app.UseDefaultFiles();
 
 app.MapHub<ChatHub>("/chatHub");    
 
-app.MapGet("/", async (context) => context.Response.Redirect("/index.html"));
+app.MapGet("/", async (context) => context.Response.Redirect("/game.html"));
 
 app.MapGet("/api/endgame", () => Data.ResetAll());
 
-
-
-app.MapGet("/api/getfield", () =>
+app.MapGet("/api/checkwaiting", () =>
 {
+    bool isWaiting = true;
+
+    if(Data.players.Count == 2)
+    {
+        isWaiting = false;
+    }
+
     var response = new
     {
-        field = Data.field,
+        isWaiting = isWaiting
     };
 
     return Results.Json(response);

@@ -33,9 +33,5 @@
 }
 
 .hidden{
-    visibility:collapse;
-}
-
-.visibile{
-    visibility:visible;
+    display:none;
 }

@@ -6,10 +6,27 @@
     <link rel="stylesheet"  href="css/main.css"/>
 </head>
 <body>
-    <div id="waiting">
+    <div id="index">
+
+        <p style="text-align:center;vertical-align:central">
+            <h4>Введите никнейм:</h4>
+            <input id="nickname" type="text" />
+            <button id="startButton">Начать игру</button>
+            <br /><br /><br /><br /><br />
+            <button id="note">Примечание</button>
+        </p>
+        <script>
+            function alrt() { alert('хост ультраТормознутый, вроде все баги связанные с медленностью исправил. /logs.html чтобы логи посмотреть'); }
+            document.getElementById("note").onclick = alrt;
+
+        </script>
+    </div>
+    <!--------------------------------------------------------------------------------------------------------------------------------------->
+    <div id="waiting" class="hidden">
 
         <h3>Ждем второго игрока</h3>
     </div>
+    <!--------------------------------------------------------------------------------------------------------------------------------------->
     <div id="game" class="hidden">
 
         <button class="hide" id="endgame">В начало</button>
@@ -43,42 +60,84 @@
     <script src="js/SignalRConnection.js"></script>
     <script>
 
-        function cheking() {
-            if (isConnected)
-                connection.invoke("CheckWaiting").catch(err => {
-                    console.error(err.toString());
+
+        let btn = document.getElementById("startButton");
+        btn.addEventListener("click", async function () {
+            if (isConnected) {
+
+                const response = await fetch("/api/setplayer?player=" + document.getElementById("nickname").value, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+
                 });
-        }
-        let timer = setInterval(cheking, 3000);
+                if (response.ok === true) {
+                    const data = await response.json();
+                    if (data.success === true) {
+                        sessionStorage.setItem("name", document.getElementById("nickname").value);
+                        sessionStorage.setItem("id", data.id);
 
-        // Обрабатываем получение сообщения
-        connection.on("ReceiveWaitingPlayer", (isWaiting) => {
-
-            if (isWaiting > 1) {
-
-                connection.invoke("SendLog", sessionStorage.getItem("name") + " : получил сообщение о готовности второго игрока").catch(err => {
-                    console.error(err.toString());
-                });
-                document.getElementById("waiting").classList.add("hidden");
-                document.getElementById("game").classList.remove("hidden");
-                clearTimeout(timer)
+                        document.getElementById("index").classList.add("hidden");
+                        document.getElementById("waiting").classList.remove("hidden");
+                    }
+                    else {
+                        alert("Такой никнейм уже используется или уже зарегистрированы 2 игрока");
+                    }
+                }
             }
-        });
+            else {
+                alert("Связь с сервером не установлена, повторите запрос через пару секунд");
+            }
 
+        })
+    </script>
 
+    <script>
+        async function cheking() {
+
+            const response = await fetch("/api/checkwaiting", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access": "application/json"
+                }
+            })
+
+            if (response.ok === true) {
+
+                const data = await response.json();
+
+                if (!data.isWaiting) {
+
+                    clearInterval(timer);
+
+                    document.getElementById("waiting").classList.add("hidden");
+                    document.getElementById("game").classList.remove("hidden");
+
+                    onStart();
+                }
+            }
+        }
+
+        let timer = setInterval(cheking, 2000);
 
     </script>
+
     <script>
-
-
-
+        let isMyAction = false;
+        
         // Обрабатываем получение сообщения
         connection.on("ReceiveMessage", (player, button) => {
+
             if (player != sessionStorage.getItem("name")) {
+
                 if (sessionStorage.getItem("id") == '0')
                     document.getElementById(button).classList.add("secondplayer");
                 else
                     document.getElementById(button).classList.add("firstplayer");
+
                 isMyAction = !isMyAction;
             }
 
@@ -86,19 +145,23 @@
 
         //получаем победителя
         connection.on("ReceiveWinner", (player) => {
+
             if (sessionStorage.getItem("name") == player) {
                 document.getElementById("win").classList.remove("hide");
             }
             else {
                 document.getElementById("lose").classList.remove("hide");
             }
+
             for (let i = 1; i < 10; i++) {
                 let button = document.getElementById(i)
 
                 button.onclick = null;
             }
+
             let btn = document.getElementById("endgame")
             btn.classList.remove("hide");
+
             btn.onclick = async () => {
                 await fetch("/api/endgame", {
                     method: "GET",
@@ -110,7 +173,6 @@
             }
         });
 
-        let isMyAction = sessionStorage.getItem("id") == '0' ? true : false;
 
         //обработка нажания на кнопку
         function clickHandler(i) {
@@ -141,21 +203,25 @@
         }
 
         //показываем цвет игрока
-        if (sessionStorage.getItem("id") == '0')
-            document.getElementById("yourcolor").classList.add("firstplayer");
-        else
-            document.getElementById("yourcolor").classList.add("secondplayer");
-
+        function onStart() {
+            if (sessionStorage.getItem("id") == '0')
+                document.getElementById("yourcolor").classList.add("firstplayer");
+            else
+                document.getElementById("yourcolor").classList.add("secondplayer");
+            isMyAction = sessionStorage.getItem("id") == '0' ? true : false;
+            for (let i = 1; i < 10; i++) {
+                let button = document.getElementById(i);
+                if (button.classList.length == 1)
+                    isMyAction = true;
+            }
+        }
         //добавляем событие на click
         for (let i = 1; i < 10; i++) {
             let button = document.getElementById(i);
             button.onclick = function () { clickHandler(button.id) };
         }
 
-
-
     </script>
-    <script src="js/StartGame.js"></script>
 
 </body>
 </html>
