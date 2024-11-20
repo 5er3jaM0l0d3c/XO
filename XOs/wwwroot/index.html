@@ -9,8 +9,14 @@
         <h4>Введите никнейм:</h4>
         <input id="nickname" type="text" />
         <button id="startButton">Начать игру</button>
+        <br /><br /><br /><br /><br />
+        <button id="note">Примечание</button>
     </p>
+    <script>
+        function alrt() { alert('хост ультраТормознутый, вроде все баги связанные с медленностью исправил. /logs.html чтобы логи посмотреть'); }
+        document.getElementById("note").onclick = alrt;
 
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr/dist/browser/signalr.min.js"></script>
     <script src="js/SignalRConnection.js"></script>
     <script>
@@ -56,7 +62,7 @@
             else {
                 alert("Подключение не было установлено, попробуйте ещё раз через пару секунд");
             }
-            
+
         })
 
     </script>
