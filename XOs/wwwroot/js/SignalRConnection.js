@@ -16,9 +16,6 @@ connection.start().then(() => {
     connection.invoke("SendLog", sessionStorage.getItem("name") + " : подключился(" + document.location.href + ")").catch(err => {
         console.error(err.toString());
     });
-    connection.invoke("CheckWaiting").catch(err => {
-        console.error(err.toString());
-    });
     
 }).catch(err => {
     console.error(err.toString());
